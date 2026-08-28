@@ -402,7 +402,8 @@ def main(server_url):
         master.episode_kill_event.clear() 
 
         master.reset_yaw_offset = True
-
+        #保持当前位姿
+        master.snapshot_current_pose()
         t_ctrl = threading.Thread(target=control_loop_thread, daemon=True)
         t_ctrl.start()
 
