@@ -569,9 +569,15 @@ class RobotTaskmaster:
                     start_time = time.time()
                     # print("kill event get True")
                     current_lr_arm_q, current_lr_arm_dq = self.get_robot_data()
-                    self.torso_height = 0.75
-                    self.torso_roll = 0.0
-                    self.torso_pitch = 0.0
+                    # self.torso_height = 0.75
+                    # self.torso_roll = 0.0
+                    # self.torso_pitch = 0.0
+
+                    # 修改为读取当前里程计高度
+                    self.torso_height = self.odom_pos[2]
+                    self.torso_roll = self.rpy[0]
+                    self.torso_pitch = self.rpy[1]
+                    # 偏航角不变
                     self.torso_yaw = 0.0
                     # print("rpy:", self.torso_roll, self.torso_pitch, self.torso_yaw)
                     # print("height:", self.torso_height)
@@ -849,3 +855,9 @@ class RobotTaskmaster:
 
         self.body_ctrl.ctrl_whole_body(pd_target[15:], pd_tauff[15:], pd_target[:15], pd_tauff[:15])
 
+    #新增部分
+    def snapshot_current_pose(self):
+        q = np.array(self.body_ctrl.get_current_motor_q())   # 29 维当前关节角
+        self.default_dof_pos = q.copy()
+        # demo_obs_template 里存的是默认臂角，也要跟着更新，否则 IK 还是会回到旧姿态
+        self.demo_obs_template[:self._n_demo_dof] = q[np.r_[15:19, 22:26]]
